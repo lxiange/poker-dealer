@@ -1,0 +1,70 @@
+<head>
+  <h1>
+    Poker Dealer
+  </h1>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+
+</head>
+
+<body>
+  <div id='errMsg'>
+    error message:
+
+  </div>
+
+  <div id='playerMsg'>
+    player message:
+
+  </div>
+  <div id='roomMsg'>
+    room message:
+
+  </div>
+  <button id='join'>
+    join to test room
+  </button>
+  <button id='reset'>
+    reset
+  </button>
+  <button id='leave'>
+    leave
+  </button>
+  <button id='play'>
+    play
+  </button>
+  <button id='deal'>
+    deal
+  </button>
+
+  <script>
+    const socket = io('http://localhost:3000');
+
+    console.log(socket);
+    document.getElementById("join").addEventListener("click", function () {
+      socket.emit('joinRoom', 'test', (data) => {
+        console.log(data);
+      });
+    });
+    document.getElementById("reset").addEventListener("click", function () {
+      socket.emit('reset', 'test');
+    });
+    document.getElementById("play").addEventListener("click", function () {
+      socket.emit('play', 'test');
+    });
+    document.getElementById("leave").addEventListener("click", function () {
+      socket.emit('leave', 'test');
+    });
+    document.getElementById("deal").addEventListener("click", function () {
+      socket.emit('deal', 'test');
+    });
+    socket.on('errMsg', (msg) => {
+      document.getElementById('errMsg').innerHTML += msg + '\n';
+    })
+    socket.on('roomMsg', (msg) => {
+      document.getElementById('roomMsg').innerHTML += msg + '\n';
+    })
+    socket.on('playerMsg', (msg) => {
+      document.getElementById('playerMsg').innerHTML += msg + '\n';
+    })
+  </script>
+</body>
