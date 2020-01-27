@@ -200,14 +200,30 @@
     </div>
 </div>
 <script>
-    const socket = io('http://192.168.2.160:3000');
+    function getServerAddress() {
+        const localKeyWords = [
+            "local",
+            "0.0.0.0",
+            "localhost",
+            "127.0.0.1"
+        ];
+        const url = window.location.href;
+        for (let i = 0; i < localKeyWords.length; i++) {
+            if (url.includes(localKeyWords[i])) {
+                return "http://localhost:3000";
+            }
+        }
+        return "";
+    }
+
+    const socket = io(getServerAddress());
     const joinContainer = document.getElementById("join-container");
     const playContainer = document.getElementById("play-container");
     const resetButton = document.getElementById("reset");
-    const leaveButton = document.getElementById("leave");
+    // const leaveButton = document.getElementById("leave");
     const playButton = document.getElementById("play");
     const dealButton = document.getElementById("deal");
-    const flipButton = document.getElementById("flip");
+    // const flipButton = document.getElementById("flip");
     let currentRoomId = null;
     let flipped = false;
     let myCards = [];
