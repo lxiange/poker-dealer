@@ -1,70 +1,321 @@
 <head>
-  <h1>
-    Poker Dealer
-  </h1>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="./js/poker.min.js"></script>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0,user-scalable=no">
+    <style type="text/css">
+        body {
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
 
+        .wrap {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .toast {
+            position: fixed;
+            top: 0;
+            left: 0;
+            text-align: center;
+            font-size: 20px;
+            line-height: 60px;
+            height: 60px;
+            width: 100%;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.65);
+            z-index: 150;
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .room-input {
+            width: 200px;
+            height: 40px;
+            outline: none;
+            font-size: 16px;
+            border: 1px solid black;
+            box-sizing: border-box;
+            padding-left: 12px;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .button {
+            background: black;
+            width: 100px;
+            height: 40px;
+            color: white;
+            text-align: center;
+            line-height: 40px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .table-button-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .table-button {
+            font-size: 16px;
+            width: 80px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: black;
+            color: white;
+            text-align: center;
+            line-height: 40px;
+            margin: 6px;
+        }
+
+        .table-button.reset, .leave {
+            background-color: #666;
+        }
+
+        .table-button.deal {
+            background-color: #f7194f;
+            width: 120px;
+        }
+
+        .table-button.play {
+            background-color: #1457ff;
+        }
+
+        #join-container {
+
+        }
+
+        #play-container {
+            display: none;
+        }
+
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            width: 90px;
+            height: 120px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            margin: 4px;
+        }
+
+        @media (min-width: 800px) {
+            .card {
+                width: 150px;
+                height: 200px;
+            }
+
+            .table-button {
+                font-size: 24px;
+                width: 120px;
+                height: 60px;
+                line-height: 60px;
+                margin: 10px;
+            }
+
+            .table-button-group {
+                margin-bottom: 40px;
+                margin-top: 40px;
+            }
+
+            .table-button.deal {
+                background-color: #f7194f;
+                width: 180px;
+            }
+        }
+
+        @media (max-height: 340px) {
+            .card {
+                width: 75px;
+                height: 100px;
+            }
+
+            .table-button-group {
+                margin-top: 12px;
+                margin-bottom: 12px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-  <div id='errMsg'>
-    error message:
-
-  </div>
-
-  <div id='playerMsg'>
-    player message:
-
-  </div>
-  <div id='roomMsg'>
-    room message:
-
-  </div>
-  <button id='join'>
-    join to test room
-  </button>
-  <button id='reset'>
-    reset
-  </button>
-  <button id='leave'>
-    leave
-  </button>
-  <button id='play'>
-    play
-  </button>
-  <button id='deal'>
-    deal
-  </button>
-
-  <script>
+<div class="wrap">
+    <div class="join-container" id="join-container">
+        <div class="input-container">
+            <input class="room-input" type="text" placeholder="Type room id" id="room-to-create"/>
+            <div class="button" id="create-button">Create</div>
+        </div>
+        <div class="input-container">
+            <input class="room-input" type="text" placeholder="Type room id" id="room-to-join"/>
+            <div class="button" id="join-button">Join</div>
+        </div>
+    </div>
+    <div class="play-container" id="play-container">
+        <div class="cards-container" id="public-cards-container">
+            <div class="card" id="p-card-0"></div>
+            <div class="card" id="p-card-1"></div>
+            <div class="card" id="p-card-2"></div>
+            <div class="card" id="p-card-3"></div>
+            <div class="card" id="p-card-4"></div>
+        </div>
+        <div class="table-button-group">
+            <div id='reset' class="table-button reset">
+                Reset
+            </div>
+            <div id='leave' class="table-button leave">
+                Leave
+            </div>
+            <div id='play' class="table-button play">
+                Play
+            </div>
+            <div id='deal' class="table-button deal">
+                Deal
+            </div>
+        </div>
+        <div class="cards-container" id="my-cards-container">
+            <div class="card" id="m-card-0"></div>
+            <div class="card" id="m-card-1"></div>
+        </div>
+    </div>
+</div>
+<script>
     const socket = io('http://localhost:3000');
+    const joinContainer = document.getElementById("join-container");
+    const playContainer = document.getElementById("play-container");
+    let currentRoomId = null;
 
-    console.log(socket);
-    document.getElementById("join").addEventListener("click", function () {
-      socket.emit('joinRoom', 'test', (data) => {
-        console.log(data);
-      });
+    function toast(text, delay = 2000) {
+        let node = document.createElement('div');
+        node.setAttribute('class', 'toast');
+        node.innerHTML = text;
+        document.body.appendChild(node);
+        setTimeout(function () {
+            document.body.removeChild(node)
+        }, delay)
+    }
+
+    function setPlay() {
+        joinContainer.style.display = "none";
+        playContainer.style.display = "block";
+    }
+
+    function setJoin() {
+        joinContainer.style.display = "block";
+        playContainer.style.display = "none";
+    }
+
+    function joinCallBack(action, roomId) {
+        currentRoomId = roomId;
+        // toast(`${action} ${roomId} success`);
+        setPlay();
+    }
+
+    function getCardHeight() {
+        let height = 120;
+        if (document.body.clientWidth > 800) {
+            height = 200;
+        }
+        if (document.body.clientHeight < 340) {
+            height = 100;
+        }
+        return height;
+    }
+
+    function renderMyCards(cards) {
+        const height = getCardHeight();
+        for (let i = 0; i < cards.length; i++) {
+            const cardDom = document.getElementById(`m-card-${i}`);
+            cardDom.innerHTML = null;
+            cardDom.appendChild(Poker.getCardCanvas(height, cards[i].substring(cards[i].length - 1), cards[i].substring(0, cards[i].length - 1)));
+        }
+    }
+
+    function cleanAllCards() {
+        for (let i = 0; i < 2; i++) {
+            const cardDom = document.getElementById(`m-card-${i}`);
+            cardDom.innerHTML = null;
+        }
+        for (let i = 0; i < 5; i++) {
+            const cardDom = document.getElementById(`p-card-${i}`);
+            cardDom.innerHTML = null;
+        }
+    }
+
+    function renderPublicCards(cards) {
+        const height = getCardHeight();
+        for (let i = 0; i < cards.length; i++) {
+            const cardDom = document.getElementById(`p-card-${i}`);
+            cardDom.innerHTML = null;
+            cardDom.appendChild(Poker.getCardCanvas(height, cards[i].substring(cards[i].length - 1), cards[i].substring(0, cards[i].length - 1)));
+        }
+    }
+
+    document.getElementById("create-button").addEventListener("click", async function () {
+        const roomId = document.getElementById("room-to-create").value;
+        if (roomId && roomId.length > 0) {
+            try {
+                await axios.post("/room/createRoom", {
+                    roomId
+                });
+                socket.emit('joinRoom', roomId);
+                joinCallBack("create", roomId);
+            } catch (e) {
+                console.log(e);
+                toast(`${roomId} already exists`);
+            }
+        }
+    });
+    document.getElementById("join-button").addEventListener("click", function () {
+        const roomId = document.getElementById("room-to-join").value;
+        if (roomId && roomId.length > 0) {
+            socket.emit('joinRoom', roomId);
+            joinCallBack("join", roomId);
+        }
     });
     document.getElementById("reset").addEventListener("click", function () {
-      socket.emit('reset', 'test');
+        socket.emit('reset', currentRoomId);
     });
     document.getElementById("play").addEventListener("click", function () {
-      socket.emit('play', 'test');
+        socket.emit('play', currentRoomId);
     });
     document.getElementById("leave").addEventListener("click", function () {
-      socket.emit('leave', 'test');
+        socket.emit('leave', currentRoomId);
+        setJoin();
     });
     document.getElementById("deal").addEventListener("click", function () {
-      socket.emit('deal', 'test');
+        socket.emit('deal', currentRoomId);
     });
     socket.on('errMsg', (msg) => {
-      document.getElementById('errMsg').innerHTML += msg + '\n';
-    })
-    socket.on('roomMsg', (msg) => {
-      document.getElementById('roomMsg').innerHTML += msg + '\n';
-    })
-    socket.on('playerMsg', (msg) => {
-      document.getElementById('playerMsg').innerHTML += msg + '\n';
-    })
-  </script>
+        console.log(msg);
+    });
+    socket.on('roomMsg', (msg, data) => {
+        console.log(data);
+        if (data.status === 0) {
+            cleanAllCards();
+        } else {
+            renderPublicCards(data.publicCards);
+        }
+    });
+    socket.on('playerMsg', (cards) => {
+        console.log(cards);
+        renderMyCards(cards);
+    });
+</script>
 </body>
