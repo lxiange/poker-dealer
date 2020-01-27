@@ -1,4 +1,5 @@
 const dao = require("../dao/dao");
+const utils = require("../utils");
 
 const ioHandler = io => {
   return socket => {
@@ -92,8 +93,10 @@ const ioHandler = io => {
         room.players.forEach(player => {
           const c1 = room.cards.pop();
           const c2 = room.cards.pop();
-          console.log("hole cards:", c1, c2);
-          io.to(player).emit("playerMsg", [c1, c2]);
+          const holeCards = [c1, c2];
+          utils.sortCards(holeCards);
+          console.log("hole cards:", holeCards);
+          io.to(player).emit("playerMsg", holeCards);
         });
       } else if (room.status === 1) {
         // flip

@@ -7,6 +7,9 @@
     "dev": "nodemon --ignore 'node_modules/*' ./bin/www",
     "test": "jest tests"
   },
+  "jest": {
+    "testEnvironment": "node"
+  },
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",

@@ -73,6 +73,31 @@ function shuffle(a) {
   return a;
 }
 
+const sortCardsFn = (a, b) => {
+  const convToNum = c => {
+    c = c.toLowerCase();
+    c = c.slice(0, -1);
+    c = c.replace("a", "14");
+    c = c.replace("j", "11");
+    c = c.replace("q", "12");
+    c = c.replace("k", "13");
+    return +c;
+  };
+  return convToNum(b) - convToNum(a);
+};
+
+function sortCards(cards) {
+  if (!Array.isArray(cards)) {
+    throw new Error("Cards is not array: ", cards);
+  }
+  for (let c of cards) {
+    if (typeof c !== "string" || c.length < 2 || c.length > 3) {
+      throw new Error("invalid card: " + c);
+    }
+  }
+  cards.sort(sortCardsFn);
+}
+
 const generateCards = () => {
   const cards = [...INIT_CARDS];
   shuffle(cards);
@@ -81,5 +106,6 @@ const generateCards = () => {
 module.exports = {
   generateUUID,
   shuffle,
-  generateCards
+  generateCards,
+  sortCards
 };
