@@ -121,6 +121,7 @@
             .card {
                 width: 150px;
                 height: 200px;
+                border-radius: 16px;
             }
 
             .table-button {
@@ -188,6 +189,9 @@
             <div id='deal' class="table-button deal">
                 Deal
             </div>
+            <div id="flip" class="table-button flip">
+                Flip
+            </div>
         </div>
         <div class="cards-container" id="my-cards-container">
             <div class="card" id="m-card-0"></div>
@@ -196,10 +200,17 @@
     </div>
 </div>
 <script>
-    const socket = io('http://localhost:3000');
+    const socket = io('http://192.168.2.160:3000');
     const joinContainer = document.getElementById("join-container");
     const playContainer = document.getElementById("play-container");
+    const resetButton = document.getElementById("reset");
+    const leaveButton = document.getElementById("leave");
+    const playButton = document.getElementById("play");
+    const dealButton = document.getElementById("deal");
+    const flipButton = document.getElementById("flip");
     let currentRoomId = null;
+    let flipped = false;
+    let myCards = [];
 
     function toast(text, delay = 2000) {
         let node = document.createElement('div');
@@ -219,6 +230,12 @@
     function setJoin() {
         joinContainer.style.display = "block";
         playContainer.style.display = "none";
+    }
+
+    function setButtonToPlayMode() {
+        resetButton.style.display = "none";
+        playButton.style.display = "none";
+        dealButton.style.display = "none";
     }
 
     function joinCallBack(action, roomId) {
@@ -267,6 +284,15 @@
         }
     }
 
+    function renderMyCardsFlipped() {
+        const height = getCardHeight();
+        for (let i = 0; i < myCards.length; i++) {
+            const cardDom = document.getElementById(`m-card-${i}`);
+            cardDom.innerHTML = null;
+            cardDom.appendChild(Poker.getBackCanvas(height, '#eee', '#000'));
+        }
+    }
+
     document.getElementById("create-button").addEventListener("click", async function () {
         const roomId = document.getElementById("room-to-create").value;
         if (roomId && roomId.length > 0) {
@@ -294,10 +320,20 @@
     });
     document.getElementById("play").addEventListener("click", function () {
         socket.emit('play', currentRoomId);
+        setButtonToPlayMode();
     });
     document.getElementById("leave").addEventListener("click", function () {
         socket.emit('leave', currentRoomId);
         setJoin();
+    });
+    document.getElementById("flip").addEventListener("click", function () {
+        if (!flipped) {
+            renderMyCardsFlipped();
+            flipped = true;
+        } else {
+            renderMyCards(myCards);
+            flipped = false;
+        }
     });
     document.getElementById("deal").addEventListener("click", function () {
         socket.emit('deal', currentRoomId);
@@ -309,12 +345,15 @@
         console.log(data);
         if (data.status === 0) {
             cleanAllCards();
+            flipped = false;
+            myCards = [];
         } else {
             renderPublicCards(data.publicCards);
         }
     });
     socket.on('playerMsg', (cards) => {
         console.log(cards);
+        myCards = cards;
         renderMyCards(cards);
     });
 </script>
