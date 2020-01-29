@@ -73,7 +73,7 @@ const ioHandler = io => {
       }
       room.players.splice(index, 1);
       const room2 = await dao.updateRoom(roomId, room);
-      io.to(roomId).emit("roomMsg", "leaveResp", uitls.toRoomVO(room2));
+      io.to(roomId).emit("roomMsg", "leaveResp", utils.toRoomVO(room2));
     });
     socket.on("deal", async roomId => {
       if (!checkRoomId(roomId)) {
@@ -139,10 +139,15 @@ const ioHandler = io => {
           room.members.splice(memberIndex, 1);
         }
         if (room.members.length === 0) {
-            dao.deleteRoom(roomId); // todo: in production
+          dao.deleteRoom(roomId); // todo: in production
           // dao.updateRoom(roomId, room);
         } else {
           dao.updateRoom(roomId, room);
+          io.to(roomId).emit(
+            "roomMsg",
+            "disconnectingResp",
+            utils.toRoomVO(room)
+          );
         }
       });
     });
