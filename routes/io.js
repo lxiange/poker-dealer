@@ -22,7 +22,7 @@ const ioHandler = io => {
       }
       const room = await dao.getRoom(roomId);
       if (room.members.includes(socket.id)) {
-        io.to(roomId).emit("roomMsg", "joinRoomResp", room);
+        io.to(roomId).emit("roomMsg", "joinRoomResp", utils.toRoomVO(room));
         return;
       }
       if (room.members > 15) {
@@ -33,14 +33,14 @@ const ioHandler = io => {
       socket.join(roomId);
       room.members.push(socket.id);
       const room2 = await dao.updateRoom(roomId, room);
-      io.to(roomId).emit("roomMsg", "joinRoomResp", room2);
+      io.to(roomId).emit("roomMsg", "joinRoomResp", utils.toRoomVO(room2));
     });
     socket.on("reset", async roomId => {
       if (!checkRoomId(roomId)) {
         return;
       }
       const room = await dao.resetRoomStatus(roomId);
-      io.to(roomId).emit("roomMsg", "resetResp", room);
+      io.to(roomId).emit("roomMsg", "resetResp", utils.toRoomVO(room));
     });
     socket.on("play", async roomId => {
       if (!checkRoomId(roomId)) {
@@ -58,7 +58,7 @@ const ioHandler = io => {
 
       room.players.push(socket.id);
       const room2 = await dao.updateRoom(roomId, room);
-      io.to(roomId).emit("roomMsg", "playResp", room2);
+      io.to(roomId).emit("roomMsg", "playResp", utils.toRoomVO(room2));
     });
     socket.on("leave", async roomId => {
       if (!checkRoomId(roomId)) {
@@ -73,7 +73,7 @@ const ioHandler = io => {
       }
       room.players.splice(index, 1);
       const room2 = await dao.updateRoom(roomId, room);
-      io.to(roomId).emit("roomMsg", "leaveResp", room2);
+      io.to(roomId).emit("roomMsg", "leaveResp", uitls.toRoomVO(room2));
     });
     socket.on("deal", async roomId => {
       if (!checkRoomId(roomId)) {
@@ -86,7 +86,7 @@ const ioHandler = io => {
       }
       if (room.status > 3) {
         const room = await dao.resetRoomStatus(roomId);
-        io.to(roomId).emit("roomMsg", "resetResp", room);
+        io.to(roomId).emit("roomMsg", "resetResp", utils.toRoomVO(room));
         return;
       }
       if (room.status === 0) {
@@ -120,7 +120,7 @@ const ioHandler = io => {
       }
       room.status++;
       const room2 = await dao.updateRoom(roomId, room);
-      io.to(roomId).emit("roomMsg", "dealResp", room2);
+      io.to(roomId).emit("roomMsg", "dealResp", utils.toRoomVO(room2));
     });
 
     socket.on("disconnecting", reason => {

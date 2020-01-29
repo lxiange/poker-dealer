@@ -103,9 +103,17 @@ const generateCards = () => {
   shuffle(cards);
   return cards;
 };
+
+const toRoomVO = room => {
+  const res = { ...room };
+  delete res.cards;
+  return res;
+};
+
 module.exports = {
   generateUUID,
   shuffle,
   generateCards,
-  sortCards
+  sortCards,
+  toRoomVO
 };
