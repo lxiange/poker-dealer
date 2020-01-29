@@ -4,7 +4,7 @@
 
 ### Usage:
 
-1. Open the website: [cmu-poker.herokuapp.com](https://cmu-poker.herokuapp.com) or [auto-poker.herokuapp.com](https://auto-poker.herokuapp.com).
+1. Open the website: [cmu-poker.herokuapp.com](https://cmu-poker.herokuapp.com).
 
 2. Input the room id, join or create a room.
 
