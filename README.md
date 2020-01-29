@@ -8,7 +8,7 @@
 
 2. Input the room id, join or create a room.
 
-3. Share the room id or the room url with your friends. Let your friends use their mobile phones open the website and join the room.
+3. Share the room id or the room url with your friends. Let your friends use their mobile phones open the website and join the room. *(Yes, after you created the room, share the url from your browser. Your friends will join the room automatically when they open this url.)*
 
 4. For those who want to sit and play, click the Play button.
 
@@ -22,5 +22,4 @@
 
 9. Click the Deal button. That's all, enjoy! **(Attention: Although everyone could click the Deal button, we strongly recommend only one member click it.)**
 
-*P.S. If one of the players doesn't want to play anymore, just close the website, the `Poker Dealer` will not send cards to him in the next round.*
-
+*P.S. If one of the players doesn't want to play anymore, just close the website, the `Poker Dealer` will not send cards to him in the next round. And the room will be destroyed if no one in the room. Everything is in memory, we don't store anything.*
