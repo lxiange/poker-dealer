@@ -292,6 +292,7 @@
         socket = io(getServerAddress());
         socket.on('errMsg', (msg) => {
             console.log(msg);
+            toast(msg);
         });
         socket.on('roomMsg', (msg, data) => {
             console.log(data);
