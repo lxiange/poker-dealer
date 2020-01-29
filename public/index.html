@@ -59,6 +59,7 @@
             text-align: center;
             line-height: 40px;
             border-radius: 0 8px 8px 0;
+            cursor: pointer;
         }
 
         .table-button-group {
@@ -80,10 +81,19 @@
             text-align: center;
             line-height: 40px;
             margin: 6px;
+            cursor: pointer;
         }
 
         .table-button.reset, .leave {
             background-color: #666;
+        }
+
+        .table-button.leave {
+            display: none;
+        }
+
+        .table-button.flip {
+            display: none;
         }
 
         .table-button.deal {
@@ -109,12 +119,44 @@
             flex-wrap: wrap;
         }
 
+        #my-cards-container {
+            visibility: hidden;
+        }
+
+        .return-to-home {
+            cursor: pointer;
+            font-size: 20px;
+            color: #1457ff;
+        }
+
+        .room-info-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .room-info-item {
+            margin-left: 12px;
+            font-size: 12px;
+            color: #999;
+        }
+
         .card {
             width: 90px;
             height: 120px;
             border: 1px solid #ddd;
             border-radius: 12px;
             margin: 4px;
+        }
+
+        .top-wrap {
+            display: none;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 8px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         @media (min-width: 800px) {
@@ -157,6 +199,14 @@
     </style>
 </head>
 <body>
+<div class="top-wrap" id="top-wrap">
+    <div class="return-to-home" id="return-to-home">Home</div>
+    <div class="room-info-container">
+        <div class="room-id room-info-item" id="room-id"></div>
+        <div class="room-members room-info-item" id="room-members"></div>
+        <div class="room-players room-info-item" id="room-players"></div>
+    </div>
+</div>
 <div class="wrap">
     <div class="join-container" id="join-container">
         <div class="input-container">
@@ -177,9 +227,6 @@
             <div class="card" id="p-card-4"></div>
         </div>
         <div class="table-button-group">
-            <div id='reset' class="table-button reset">
-                Reset
-            </div>
             <div id='leave' class="table-button leave">
                 Leave
             </div>
@@ -191,6 +238,9 @@
             </div>
             <div id="flip" class="table-button flip">
                 Flip
+            </div>
+            <div id='reset' class="table-button reset">
+                Reset
             </div>
         </div>
         <div class="cards-container" id="my-cards-container">
@@ -216,17 +266,56 @@
         return "";
     }
 
-    const socket = io(getServerAddress());
+    async function getRoomIdFromUrl() {
+        const roomId = location.search.split("=")[1];
+        if (roomId) {
+            await joinOrCreateRoom(roomId, "enterRoom");
+        }
+    }
+
+    getRoomIdFromUrl();
+
+    let socket = null;
     const joinContainer = document.getElementById("join-container");
     const playContainer = document.getElementById("play-container");
     const resetButton = document.getElementById("reset");
-    // const leaveButton = document.getElementById("leave");
+    const leaveButton = document.getElementById("leave");
     const playButton = document.getElementById("play");
     const dealButton = document.getElementById("deal");
-    // const flipButton = document.getElementById("flip");
+    const flipButton = document.getElementById("flip");
     let currentRoomId = null;
     let flipped = false;
     let myCards = [];
+
+
+    function initSocket() {
+        socket = io(getServerAddress());
+        socket.on('errMsg', (msg) => {
+            console.log(msg);
+        });
+        socket.on('roomMsg', (msg, data) => {
+            console.log(data);
+            if (data.status === 0) {
+                cleanAllCards();
+                flipped = false;
+                myCards = [];
+            } else {
+                renderPublicCards(data.publicCards);
+            }
+            updateRoomInfo(data);
+        });
+        socket.on('playerMsg', (cards) => {
+            console.log(cards);
+            myCards = cards;
+            renderMyCards(cards);
+        });
+    }
+
+    function updateRoomInfo(data) {
+        document.getElementById("room-id").innerText = "Room: " + data.id;
+        document.getElementById("room-members").innerText = "Members: " + data.members.length;
+        document.getElementById("room-players").innerText = "Players: " + data.players.length;
+    }
 
     function toast(text, delay = 2000) {
         let node = document.createElement('div');
@@ -243,20 +332,26 @@
         playContainer.style.display = "block";
     }
 
-    function setJoin() {
-        joinContainer.style.display = "block";
-        playContainer.style.display = "none";
+    function setButtonToLeaveMode() {
+        dealButton.style.display = "block";
+        playButton.style.display = "block";
+        flipButton.style.display = "none";
+        resetButton.style.display = "block";
+        leaveButton.style.display = "none";
     }
 
     function setButtonToPlayMode() {
         resetButton.style.display = "none";
         playButton.style.display = "none";
-        dealButton.style.display = "none";
+        dealButton.style.display = "block";
+        flipButton.style.display = "block";
+        leaveButton.style.display = "block";
+        // dealButton.style.display = "none";
     }
 
     function joinCallBack(action, roomId) {
         currentRoomId = roomId;
-        // toast(`${action} ${roomId} success`);
+        document.getElementById("top-wrap").style.display = "flex";
         setPlay();
     }
 
@@ -278,6 +373,18 @@
             cardDom.innerHTML = null;
             cardDom.appendChild(Poker.getCardCanvas(height, cards[i].substring(cards[i].length - 1), cards[i].substring(0, cards[i].length - 1)));
         }
+    }
+
+    function showMyCards() {
+        document.getElementById("my-cards-container").style.visibility = "visible";
+    }
+
+    function hideMyCards() {
+        for (let i = 0; i < 2; i++) {
+            const cardDom = document.getElementById(`m-card-${i}`);
+            cardDom.innerHTML = null;
+        }
+        document.getElementById("my-cards-container").style.visibility = "hidden";
     }
 
     function cleanAllCards() {
@@ -309,38 +416,58 @@
         }
     }
 
+    async function joinOrCreateRoom(roomId, action) {
+        try {
+            await axios.post(`/room/${action}`, {
+                roomId
+            });
+            initSocket();
+            socket.emit('joinRoom', roomId);
+            joinCallBack(action, roomId);
+        } catch (e) {
+            toast(e.response.data.errMsg);
+        }
+    }
+
     document.getElementById("create-button").addEventListener("click", async function () {
         const roomId = document.getElementById("room-to-create").value;
         if (roomId && roomId.length > 0) {
+            // await joinOrCreateRoom(roomId, "createRoom");
             try {
-                await axios.post("/room/createRoom", {
+                await axios.post(`/room/createRoom`, {
                     roomId
                 });
-                socket.emit('joinRoom', roomId);
-                joinCallBack("create", roomId);
+                window.location.href = `/?id=${roomId}`;
             } catch (e) {
-                console.log(e);
-                toast(`${roomId} already exists`);
+                toast(e.response.data.errMsg);
             }
+        } else {
+            toast("Empty room id");
         }
     });
-    document.getElementById("join-button").addEventListener("click", function () {
+    document.getElementById("join-button").addEventListener("click", async function () {
         const roomId = document.getElementById("room-to-join").value;
         if (roomId && roomId.length > 0) {
-            socket.emit('joinRoom', roomId);
-            joinCallBack("join", roomId);
+            // await joinOrCreateRoom(roomId, "enterRoom");
+            window.location.href = `/?id=${roomId}`;
+        } else {
+            toast("Empty room id");
         }
     });
     document.getElementById("reset").addEventListener("click", function () {
         socket.emit('reset', currentRoomId);
+
     });
     document.getElementById("play").addEventListener("click", function () {
         socket.emit('play', currentRoomId);
         setButtonToPlayMode();
+        showMyCards();
     });
     document.getElementById("leave").addEventListener("click", function () {
         socket.emit('leave', currentRoomId);
-        setJoin();
+        setButtonToLeaveMode();
+        hideMyCards();
+        // setJoin();
     });
     document.getElementById("flip").addEventListener("click", function () {
         if (!flipped) {
@@ -354,23 +481,9 @@
     document.getElementById("deal").addEventListener("click", function () {
         socket.emit('deal', currentRoomId);
     });
-    socket.on('errMsg', (msg) => {
-        console.log(msg);
-    });
-    socket.on('roomMsg', (msg, data) => {
-        console.log(data);
-        if (data.status === 0) {
-            cleanAllCards();
-            flipped = false;
-            myCards = [];
-        } else {
-            renderPublicCards(data.publicCards);
-        }
-    });
-    socket.on('playerMsg', (cards) => {
-        console.log(cards);
-        myCards = cards;
-        renderMyCards(cards);
-    });
+
+    document.getElementById("return-to-home").addEventListener("click", function () {
+        window.location.href = "/";
+    })
 </script>
 </body>

@@ -139,8 +139,8 @@ const ioHandler = io => {
           room.members.splice(memberIndex, 1);
         }
         if (room.members.length === 0) {
-          //   dao.deleteRoom(roomId); // todo: in production
-          dao.updateRoom(roomId, room);
+            dao.deleteRoom(roomId); // todo: in production
+          // dao.updateRoom(roomId, room);
         } else {
           dao.updateRoom(roomId, room);
         }
