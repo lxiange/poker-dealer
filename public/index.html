@@ -1,6 +1,7 @@
 <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.6.0/NoSleep.min.js"></script>
     <script src="./js/poker.min.js"></script>
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0,user-scalable=no">
@@ -304,7 +305,7 @@
     const dealButton = document.getElementById("deal");
     const flipButton = document.getElementById("flip");
     let currentRoomId = null;
-    let flipped = false;
+    let flipped = true;
     let myCards = [];
 
 
@@ -318,7 +319,7 @@
             console.log(data);
             if (data.status === 0) {
                 cleanAllCards();
-                flipped = false;
+                flipped = true;
                 myCards = [];
             } else {
                 renderPublicCards(data.publicCards);
@@ -328,7 +329,9 @@
         socket.on('playerMsg', (cards) => {
             console.log(cards);
             myCards = cards;
-            renderMyCards(cards);
+            // renderMyCards(cards);
+            flipped = true;
+            renderMyCardsFlipped();
         });
     }
 
@@ -505,6 +508,10 @@
 
     document.getElementById("return-to-home").addEventListener("click", function () {
         window.location.href = "/";
-    })
+    });
+
+    const noSleep = new NoSleep();
+    noSleep.enable()
+
 </script>
 </body>

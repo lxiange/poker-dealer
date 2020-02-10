@@ -30,7 +30,7 @@ router.post("/enterRoom", async (req, res, next) => {
     }
 });
 
-router.get("/listRoom", async (req, res, next) => {
+router.get("/list", async (req, res, next) => {
     const roomList = await dao.listRoom();
     res.json(roomList);
 });

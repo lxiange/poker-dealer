@@ -12,7 +12,7 @@ const newEmptyRoom = roomId => {
 };
 
 const ROOM_MAP = new Map();
-ROOM_MAP.set("test", newEmptyRoom("test"));
+ROOM_MAP.set("_test", newEmptyRoom("_test"));
 
 const createRoom = async roomId => {
   if (ROOM_MAP.get(roomId)) {
