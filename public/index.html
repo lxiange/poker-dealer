@@ -307,6 +307,7 @@
     let currentRoomId = null;
     let flipped = true;
     let myCards = [];
+    const noSleep = new NoSleep();
 
 
     function initSocket() {
@@ -480,12 +481,12 @@
     });
     document.getElementById("reset").addEventListener("click", function () {
         socket.emit('reset', currentRoomId);
-
     });
     document.getElementById("play").addEventListener("click", function () {
         socket.emit('play', currentRoomId);
         setButtonToPlayMode();
         showMyCards();
+        noSleep.enable();
     });
     document.getElementById("leave").addEventListener("click", function () {
         socket.emit('leave', currentRoomId);
@@ -501,17 +502,16 @@
             renderMyCards(myCards);
             flipped = false;
         }
+        noSleep.enable();
     });
     document.getElementById("deal").addEventListener("click", function () {
         socket.emit('deal', currentRoomId);
+        noSleep.enable();
     });
 
     document.getElementById("return-to-home").addEventListener("click", function () {
         window.location.href = "/";
     });
-
-    const noSleep = new NoSleep();
-    noSleep.enable()
 
 </script>
 </body>
